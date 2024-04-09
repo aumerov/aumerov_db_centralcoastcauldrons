@@ -12,6 +12,13 @@ def get_catalog():
     """
 
     return [
+            # {
+            #     "sku": "GREEN_POTION_0",
+            #     "name": "greeen potion",
+            #     "quantity": 1,
+            #     "price": 100,
+            #     "potion_type": [0, 0, 100, 0],
+            # },
             {
                 "sku": "RED_POTION_0",
                 "name": "red potion",
