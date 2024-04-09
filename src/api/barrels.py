@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from src.api import auth
 import sqlalchemy
 from src import database as db
+import math
 
 router = APIRouter(
     prefix="/barrels",
@@ -18,6 +19,11 @@ class Barrel(BaseModel):
     price: int
 
     quantity: int
+
+
+
+
+
 
 @router.post("/deliver/{order_id}")
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # hard coded to 1 small green barrel for now
@@ -77,6 +83,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
 
 
 
+
 # Gets called once a day
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
@@ -85,12 +92,12 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print(wholesale_catalog)
 
     with db.engine.begin() as connection:
-            sql_to_execute = \
-                """SELECT * 
-                FROM global_inventory
-                
-                """
-            result = connection.execute(sqlalchemy.text(sql_to_execute))
+        sql_to_execute = \
+            """SELECT * 
+            FROM global_inventory
+            
+            """
+        result = connection.execute(sqlalchemy.text(sql_to_execute))
 
     # hard coding for now
     data = result.fetchall() 
@@ -112,7 +119,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 stock = barrel.quantity
                 num_eligible_for_purchase = 0
                 if gold >= barrel.price:
-                    num_eligible_for_purchase = round(gold / barrel.price)  
+                    num_eligible_for_purchase = math.floor(gold / barrel.price)  
                     # if we try to buy more barrels than stock  
                     if num_eligible_for_purchase > stock:  # better way to do this using ':' but I forgot and don't want to look it up rn
                         num_eligible_for_purchase = stock

@@ -7,7 +7,7 @@ def database_connection_url():
 
     url = os.environ.get("POSTGRES_URI")
     if url is None:
-        raise ValueError("POSTGRES_URI environment variable is not set")
+        raise ValueError("POSTGRES_URI is not set")
     return url
 
 engine = create_engine(database_connection_url(), pool_pre_ping=True)

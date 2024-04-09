@@ -4,6 +4,7 @@ from src.api import auth
 from enum import Enum
 import sqlalchemy
 from src import database as db
+import os
 
 router = APIRouter(
     prefix="/carts",
@@ -87,22 +88,40 @@ def post_visits(visit_id: int, customers: list[Customer]):
 @router.post("/")
 def create_cart(new_cart: Customer):
     """ """
-    return {"cart_id": 1}
+    
+    # using a global log.txt file to count. Code from Stack Overflow
+    with open('log.txt','r') as f:
+        counter = int(f.read())
+        counter += 1 
+    with open('log.txt','w') as f:
+        f.write(str(counter))
+
+    return {"cart_id": counter}
 
 
 class CartItem(BaseModel):
     quantity: int
 
 
+
+
+
+
+
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
-
+    # TODO: populate
     return "OK"
 
 
 class CartCheckout(BaseModel):
     payment: str
+
+
+
+
+
 
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
