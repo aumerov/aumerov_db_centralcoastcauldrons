@@ -23,8 +23,7 @@ def get_catalog():
     print("Catalog")
     print("Current table: ", data) 
     num_green_potions = data[0][0]
-    num_green_ml = data[0][1]
-    gold = data[0][2]
+    gold = data[0][2]  # could use for dynamic pricing in future
 
     print(f"Selling {num_green_potions} green potions at {60} gold each.")
 
@@ -42,22 +41,19 @@ def get_catalog():
 
     return [{}] # return empty dictionary?
 
-    return [
-            # {
-            #     "sku": "GREEN_POTION_0",
-            #     "name": "greeen potion",
-            #     "quantity": 1,
-            #     "price": 100,
-            #     "potion_type": [0, 0, 100, 0],
-            # },
-            {
-                "sku": "RED_POTION_0",
-                "name": "red potion",
-                "quantity": 1,
-                "price": 50,
-                "potion_type": [100, 0, 0, 0],
-            }
-        ]
-
-# with db.engine.begin() as connection:
-#         result = connection.execute(sqlalchemy.text(sql_to_execute))
+    # return [
+    #         # {
+    #         #     "sku": "GREEN_POTION_0",
+    #         #     "name": "greeen potion",
+    #         #     "quantity": 1,
+    #         #     "price": 100,
+    #         #     "potion_type": [0, 0, 100, 0],
+    #         # },
+    #         {
+    #             "sku": "RED_POTION_0",
+    #             "name": "red potion",
+    #             "quantity": 1,
+    #             "price": 50,
+    #             "potion_type": [100, 0, 0, 0],
+    #         }
+    #     ]

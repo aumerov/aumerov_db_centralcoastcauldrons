@@ -90,12 +90,13 @@ def create_cart(new_cart: Customer):
     """ """
     
     # using a global log.txt file to count. Code from Stack Overflow
-    with open('log.txt','r') as f:
+    with open('src/log.txt','r') as f:
         counter = int(f.read())
         counter += 1 
-    with open('log.txt','w') as f:
+    with open('src/log.txt','w') as f:
         f.write(str(counter))
 
+    print(counter)
     return {"cart_id": counter}
 
 
@@ -106,28 +107,84 @@ class CartItem(BaseModel):
 
 
 
-
-
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
-    # TODO: populate
+    with db.engine.begin() as connection: # SELECT step may be unnecessary
+        sql_to_execute = \
+            """SELECT * 
+            FROM global_inventory
+            """
+        result = connection.execute(sqlalchemy.text(sql_to_execute))
+
+        data = result.fetchall() 
+        num_green_potions = data[0][0]
+        print("Table contents: ", data)
+
+        # Still hard coded to green potions
+        if item_sku != 'GREEN_POTION_0':
+            print("Unsupported Potion type. This will be implemented in a later update.")
+            return "Unsupported Potion type. This will be implemented in a later update."
+        
+        # Limit to one potion at a time? FOR V1 ONLY
+        if cart_item.quantity < 0 or cart_item.quantity > 1:
+            print("Only accepting orders of one item at a time.")
+            return "Only accepting orders of one item at a time."
+
+        # # Check stock
+        # if cart_item.quantity > num_green_potions:
+        #     print("Insufficient Stock")
+        #     return "Insufficient Stock"
+
     return "OK"
+
+
+
 
 
 class CartCheckout(BaseModel):
     payment: str
 
 
-
-
-
-
 @router.post("/{cart_id}/checkout")
-def checkout(cart_id: int, cart_checkout: CartCheckout):
+def checkout(cart_id: int, cart_checkout: CartCheckout):  # still hard coded for part 1
     """ """
+    # profit = int(cart_checkout.payment)
 
-    return {"total_potions_bought": 1, "total_gold_paid": 50}
+    with db.engine.begin() as connection: # SELECT step may be unnecessary. Using to fetch table
+        sql_to_execute = \
+            """SELECT * 
+            FROM global_inventory;
+            """
+        result = connection.execute(sqlalchemy.text(sql_to_execute))
 
-# with db.engine.begin() as connection:
-#         result = connection.execute(sqlalchemy.text(sql_to_execute))
+        data = result.fetchall() 
+        num_green_potions = data[0][0]
+        gold = data[0][2]
+
+        # Double checking
+        if num_green_potions == 0:
+            print("Out of potions! Come back later.")
+            return "Out of potions! Come back later."
+
+
+        # UPDATE
+        # price still hard coded at 60.
+        sql_to_execute = \
+            f"""UPDATE global_inventory
+            SET num_green_potions = {num_green_potions - 1},
+            gold = {gold + 60};
+            """
+        result = connection.execute(sqlalchemy.text(sql_to_execute))
+
+        # check updated table
+        sql_to_execute = \
+            """SELECT * 
+            FROM global_inventory;
+            """
+        result = connection.execute(sqlalchemy.text(sql_to_execute))
+
+        data = result.fetchall() 
+        print("Checkout Result: ", data) 
+
+    return {"total_potions_bought": 1, "total_gold_paid": 60}

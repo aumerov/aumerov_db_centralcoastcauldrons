@@ -54,7 +54,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         sql_to_execute = \
             f"""UPDATE global_inventory
             SET num_green_ml = {num_green_ml - (potions_brewed * 100)},
-            num_green_potions = {potions_brewed};
+            num_green_potions = {num_green_potions + potions_brewed};
             """
         result = connection.execute(sqlalchemy.text(sql_to_execute))
 
@@ -70,7 +70,6 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         print("Potion brew result: ", data) 
 
     return "OK"
-
 
 
 
@@ -103,29 +102,11 @@ def get_bottle_plan():
         num_green_ml = data[0][1]
         gold = data[0][2]
 
-        # Step 1 logic: bottle all barrels into green potions.
+        # V1 logic: bottle all barrels into green potions.
         potions_brewed = 0
         if num_green_ml > 0:
             potions_brewed = math.floor(num_green_ml / 100) # 100ml per potion
         
-        # # UPDATE
-        # sql_to_execute = \
-        #     f"""UPDATE global_inventory
-        #     SET num_green_ml = {num_green_ml - (potions_brewed * 100)},
-        #     num_green_potions = {potions_brewed};
-        #     """
-        # result = connection.execute(sqlalchemy.text(sql_to_execute))
-
-        # # check updated table
-        # sql_to_execute = \
-        #     """SELECT * 
-        #     FROM global_inventory
-            
-        #     """
-        # result = connection.execute(sqlalchemy.text(sql_to_execute))
-
-        # data = result.fetchall() 
-        # print("Potion brew result: ", data) 
 
         print(f"Brewing {potions_brewed} green potions")
 
@@ -134,17 +115,13 @@ def get_bottle_plan():
             "quantity": potions_brewed,
         }]
 
-
-
-
-
-    # Initial logic: bottle all barrels into red potions.
-    return [
-            {
-                "potion_type": [100, 0, 0, 0],
-                "quantity": 5,
-            }
-        ]
+    # # Initial logic: bottle all barrels into red potions.
+    # return [
+    #         {
+    #             "potion_type": [100, 0, 0, 0],
+    #             "quantity": 5,
+    #         }
+    #     ]
 
 
 if __name__ == "__main__":

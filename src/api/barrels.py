@@ -40,7 +40,6 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
 
         # hard coding for now
         data = result.fetchall() 
-        num_green_potions = data[0][0]
         num_green_ml = data[0][1]
         gold = data[0][2]
 
@@ -63,7 +62,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
             """
         result = connection.execute(sqlalchemy.text(sql_to_execute))
 
-        # print(result.fetchall)
+        # # # print(result.fetchall) # not working with update? interesting, will look into another day.
 
         # check updated table
         sql_to_execute = \
