@@ -1,3 +1,6 @@
+# Adapted and worked on by Arthur Umerov
+For CSC 365 - Databases, Spring 2024.
+
 # Central Coast Cauldrons
 
 Central Coast Cauldrons is a stubbed out API meant to serve as a starting point for learning how to build backend servies that integrate with a persistance layer. You will progressively build out your own forked version of the API and integrate with a progressively more sophisticated database backend. When you register your backend at the [Potion Exchange](https://potion-exchange.vercel.app/) simulated customers will shop at your store using your API. 
