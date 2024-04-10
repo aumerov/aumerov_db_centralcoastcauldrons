@@ -110,7 +110,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     # for item in wholesale_catalog:
     #     print(item)
     
-    
+    barrels_to_purchase = []
     # hard coded, only buy small green barrels
     if num_green_potions < 10: # if less than 10 green potions, buy small green barrels
         for barrel in wholesale_catalog:
@@ -122,18 +122,14 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     # if we try to buy more barrels than stock  
                     if num_eligible_for_purchase > stock:  # better way to do this using ':' but I forgot and don't want to look it up rn
                         num_eligible_for_purchase = stock
-                print(f"Buying {num_eligible_for_purchase} green barrels")
+                print(f"Can purchase {num_eligible_for_purchase} green barrels")
 
         # buy green barrels
-        return {
+        if num_eligible_for_purchase > 0:
+            barrels_to_purchase.append( {
                 "sku": "SMALL_GREEN_BARREL",
                 "quantity": num_eligible_for_purchase
-        }
+        })
     
     # else
-    return [
-        {
-            "sku": "SMALL_RED_BARREL",
-            "quantity": 1,
-        }
-    ]
+    return barrels_to_purchase

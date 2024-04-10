@@ -103,25 +103,21 @@ def get_bottle_plan():
         gold = data[0][2]
 
         # V1 logic: bottle all barrels into green potions.
-        potions_brewed = 0
+        potions_brewed = []
+        num_potions_brewed = 0
         if num_green_ml > 0:
-            potions_brewed = math.floor(num_green_ml / 100) # 100ml per potion
+            num_potions_brewed = math.floor(num_green_ml / 100) # 100ml per potion
         
 
-        print(f"Brewing {potions_brewed} green potions")
+        print(f"Brewing {num_potions_brewed} green potions")
 
-        return [{
+        potions_brewed.append({
             "potion_type": [0, 0, 100, 0],
-            "quantity": potions_brewed,
-        }]
+            "quantity": num_potions_brewed,
+        })
 
-    # # Initial logic: bottle all barrels into red potions.
-    # return [
-    #         {
-    #             "potion_type": [100, 0, 0, 0],
-    #             "quantity": 5,
-    #         }
-    #     ]
+    # Initial logic: bottle all barrels into red potions.
+    return potions_brewed
 
 
 if __name__ == "__main__":

@@ -30,16 +30,17 @@ def get_catalog():
     # hard coded:
         # assumed to be all green potions
         # prices (for now), for small profit
+    catalog = []
     if num_green_potions > 0:
-        return [{
+        catalog.append({
             "sku": "GREEN_POTION_0",
             "name": "green potion",
             "quantity": {num_green_potions},
             "price": 60,
             "potion_type": [0, 0, 100, 0],
-        }]
+        })
 
-    return [{}] # return empty dictionary?
+    return catalog # return empty dictionary?
 
     # return [
     #         # {
