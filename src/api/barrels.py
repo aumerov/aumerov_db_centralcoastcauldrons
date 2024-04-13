@@ -103,7 +103,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     # hard coding for now
     data = result.fetchall() 
-    print("Plan Result: ", data) 
+    print("Current status ", data) 
     num_green_potions = data[0][0]
     num_green_ml = data[0][1]
     gold = data[0][2]

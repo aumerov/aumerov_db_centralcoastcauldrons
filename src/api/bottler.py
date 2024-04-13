@@ -43,7 +43,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         num_green_ml = data[0][1]
         gold = data[0][2]
 
-        for potion in potions_delivered:  # assuming 1 (hard coded)
+        for potion in potions_delivered:  # assuming 5 (hard coded)
             potions_brewed = potion.quantity
 
         if num_green_ml >= 100:  # can brew more potions
