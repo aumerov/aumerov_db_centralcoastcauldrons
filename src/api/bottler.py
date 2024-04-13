@@ -46,28 +46,25 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         for potion in potions_delivered:  # assuming 1 (hard coded)
             potions_brewed = potion.quantity
 
-        if num_green_ml <= 100:  # return if cannot brew more potions
-            print("Insufficient ml to brew new potions")
-            return "Insufficient ml to brew new potions"
+        if num_green_ml >= 100:  # can brew more potions
+            # UPDATE
+            sql_to_execute = \
+                f"""UPDATE global_inventory
+                SET num_green_ml = {num_green_ml - (potions_brewed * 100)},
+                num_green_potions = {num_green_potions + potions_brewed};
+                """
+            result = connection.execute(sqlalchemy.text(sql_to_execute))
 
-        # UPDATE
-        sql_to_execute = \
-            f"""UPDATE global_inventory
-            SET num_green_ml = {num_green_ml - (potions_brewed * 100)},
-            num_green_potions = {num_green_potions + potions_brewed};
-            """
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+            # check updated table
+            sql_to_execute = \
+                """SELECT * 
+                FROM global_inventory
+                
+                """
+            result = connection.execute(sqlalchemy.text(sql_to_execute))
 
-        # check updated table
-        sql_to_execute = \
-            """SELECT * 
-            FROM global_inventory
-            
-            """
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
-
-        data = result.fetchall() 
-        print("Potion brew result: ", data) 
+            data = result.fetchall() 
+            print("Potion brew result: ", data) 
 
     return "OK"
 
@@ -107,14 +104,13 @@ def get_bottle_plan():
         num_potions_brewed = 0
         if num_green_ml > 0:
             num_potions_brewed = math.floor(num_green_ml / 100) # 100ml per potion
-        
 
-        print(f"Brewing {num_potions_brewed} green potions")
+            potions_brewed.append({
+                "potion_type": [0, 0, 100, 0],
+                "quantity": num_potions_brewed,
+            })
 
-        potions_brewed.append({
-            "potion_type": [0, 0, 100, 0],
-            "quantity": num_potions_brewed,
-        })
+    print(f"Brewing {num_potions_brewed} green potions")
 
     # Initial logic: bottle all barrels into red potions.
     return potions_brewed

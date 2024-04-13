@@ -43,13 +43,16 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
         num_green_ml = data[0][1]
         gold = data[0][2]
 
-        # parse order
+
+        quant = 0
+        # parse order, only accepting green barrels
         for barrel in barrels_delivered:
                 if barrel.sku == "SMALL_GREEN_BARREL":
-                    quant = barrel.quantity
+                    quant += 1
                     price = barrel.price
                     ml = barrel.ml_per_barrel
 
+        # if error, double check
         if int(price) * int(quant) > gold:
              print("Insufficient gold to complete order!")
              return "Insufficient gold to complete order"
@@ -57,8 +60,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
         # else UPDATE
         sql_to_execute = \
             f"""UPDATE global_inventory
-            SET num_green_ml = {num_green_ml + ml},
-            gold = {gold - int(quant) * int(price)};
+            SET num_green_ml = {num_green_ml + ml * quant},
+            gold = {gold - quant * price};
             """
         result = connection.execute(sqlalchemy.text(sql_to_execute))
 
@@ -111,16 +114,16 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     #     print(item)
     
     barrels_to_purchase = []
+    num_eligible_for_purchase = 0
     # hard coded, only buy small green barrels
     if num_green_potions < 10: # if less than 10 green potions, buy small green barrels
         for barrel in wholesale_catalog:
             if barrel.sku == "SMALL_GREEN_BARREL":
                 stock = barrel.quantity
-                num_eligible_for_purchase = 0
                 if gold >= barrel.price:
                     num_eligible_for_purchase = math.floor(gold / barrel.price)  
                     # if we try to buy more barrels than stock  
-                    if num_eligible_for_purchase > stock:  # better way to do this using ':' but I forgot and don't want to look it up rn
+                    if num_eligible_for_purchase > stock :  # better way to do this using ':' but I forgot and don't want to look it up rn
                         num_eligible_for_purchase = stock
                 print(f"Can purchase {num_eligible_for_purchase} green barrels")
 
