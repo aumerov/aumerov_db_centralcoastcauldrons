@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 import sqlalchemy
 from src import database as db
+from .helper import global_status, potion_status
 
 router = APIRouter()
 
@@ -37,7 +38,7 @@ def get_catalog():
             "name": "green potion",
             "quantity": {num_green_potions},
             "price": 60,
-            "potion_type": [0, 0, 100, 0],
+            "potion_type": [0, 100, 0, 0],
         })
 
     return catalog # return empty dictionary?

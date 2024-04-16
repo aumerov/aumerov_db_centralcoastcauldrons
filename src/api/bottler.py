@@ -5,6 +5,7 @@ from src.api import auth
 import sqlalchemy
 from src import database as db
 import math
+from .helper import global_status, potion_status
 
 router = APIRouter(
     prefix="/bottler",
@@ -106,7 +107,7 @@ def get_bottle_plan():
             num_potions_brewed = math.floor(num_green_ml / 100) # 100ml per potion
 
             potions_brewed.append({
-                "potion_type": [0, 0, 100, 0],
+                "potion_type": [0, 100, 0, 0],
                 "quantity": num_potions_brewed,
             })
 
