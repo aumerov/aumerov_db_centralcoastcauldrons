@@ -100,6 +100,8 @@ def create_cart(new_cart: Customer):
     print(counter)
     return {"cart_id": counter}
 
+    # sql_to_execute = "INSERT INTO orders (id) VALUES "
+
 
 class CartItem(BaseModel):
     quantity: int
@@ -115,9 +117,15 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
         num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
         
-        # hard coding to 1 item per visit, for now
+        # hard coding to 1 item (red, green or blue potion) per cart, for now
         if cart_item.quantity > 1:
             cart_item.quantity = 1
+
+        # NOT FINISHED HERE.
+        # I realized I am not sure how this works, so I will hold off and hope other work gets partial credit.
+        # What does this function do? How does it get its information to checkout() ?
+        # 
+
         
 
         # if item_sku == 'RED_POTION_0':
@@ -149,14 +157,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
         num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
 
-        # Double checking
-        if num_green_potions == 0:
-            print("Out of potions! Come back later.")
-            return "Out of potions! Come back later."
-
 
         # UPDATE
-        # price still hard coded at 50/60/80.
+        # price still hard coded at 50/60/80 for R/G/B. Assuming we sold 1 green potion
         sql_to_execute = \
             f"""UPDATE global_inventory
             SET num_green_potions = {num_green_potions - 1},
@@ -165,13 +168,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         result = connection.execute(sqlalchemy.text(sql_to_execute))
 
         # check updated table
-        sql_to_execute = \
-            """SELECT * 
-            FROM global_inventory;
-            """
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
-
-        data = result.fetchall() 
-        print("Checkout Result: ", data) 
+        global_status() 
 
     return {"total_potions_bought": 1, "total_gold_paid": 60}
