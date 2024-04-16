@@ -111,31 +111,24 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
-    with db.engine.begin() as connection: # SELECT step may be unnecessary
-        sql_to_execute = \
-            """SELECT * 
-            FROM global_inventory
-            """
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
-
-        data = result.fetchall() 
-        num_green_potions = data[0][0]
-        print("Table contents: ", data)
-
-        # Still hard coded to green potions
-        if item_sku != 'GREEN_POTION_0':
-            print("Unsupported Potion type. This will be implemented in a later update.")
-            return "Unsupported Potion type. This will be implemented in a later update."
+    with db.engine.begin() as connection:
+        gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
+        num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
         
-        # Limit to one potion at a time? FOR V1 ONLY
-        if cart_item.quantity < 0 or cart_item.quantity > 1:
-            print("Only accepting orders of one item at a time.")
-            return "Only accepting orders of one item at a time."
+        # hard coding to 1 item per visit, for now
+        if cart_item.quantity > 1:
+            cart_item.quantity = 1
+        
 
-        # # Check stock
-        # if cart_item.quantity > num_green_potions:
-        #     print("Insufficient Stock")
-        #     return "Insufficient Stock"
+        # if item_sku == 'RED_POTION_0':
+        #     num_red = cart_item.quantity
+        #     return
+        # elif item_sku == 'GREEN_POTION_0':
+        #     num_green = cart_item.quantity
+        #     return
+        # elif item_sku == 'BLUE_POTION_0':
+        #     num_blue = cart_item.quantity
+        #     return
 
     return "OK"
 
@@ -148,20 +141,13 @@ class CartCheckout(BaseModel):
 
 
 @router.post("/{cart_id}/checkout")
-def checkout(cart_id: int, cart_checkout: CartCheckout):  # still hard coded for part 1
+def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     # profit = int(cart_checkout.payment)
 
-    with db.engine.begin() as connection: # SELECT step may be unnecessary. Using to fetch table
-        sql_to_execute = \
-            """SELECT * 
-            FROM global_inventory;
-            """
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
-
-        data = result.fetchall() 
-        num_green_potions = data[0][0]
-        gold = data[0][2]
+    with db.engine.begin() as connection:
+        gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
+        num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
 
         # Double checking
         if num_green_potions == 0:
@@ -170,7 +156,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):  # still hard coded for
 
 
         # UPDATE
-        # price still hard coded at 60.
+        # price still hard coded at 50/60/80.
         sql_to_execute = \
             f"""UPDATE global_inventory
             SET num_green_potions = {num_green_potions - 1},
