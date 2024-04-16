@@ -37,7 +37,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
 
     with db.engine.begin() as connection:
         gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
-        num_red_potions, num_green_potions, num_blue_potions = potion_status()  
+        num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status()  
 
         if gold == 0:   # for testing purposes
             return "OK"
@@ -105,7 +105,6 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
             connection.execute(sqlalchemy.text(command))
 
         # check updated table
-        print()
         global_status()
 
     return "OK"
@@ -126,7 +125,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print(wholesale_catalog)
 
     gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status()
-    num_red_potions, num_green_potions, num_blue_potions = potion_status()
+    num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status()
     catalog = itemize(wholesale_catalog)
     
     # Semi-hard coded to purchase small red, green, blue barrels.

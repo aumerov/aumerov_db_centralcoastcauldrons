@@ -12,27 +12,23 @@ def get_catalog():
     Each unique item combination must have only a single price.
     """
     with db.engine.begin() as connection:
-        sql_to_execute = \
-            """SELECT * 
-            FROM global_inventory
-            
-            """
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+        gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
+        num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
 
-    # hard coding for now
-    data = result.fetchall() 
-    print("Catalog")
-    print("Current table: ", data) 
-    num_green_potions = data[0][0]
-    gold = data[0][2]  # could use for dynamic pricing in future
+    # semi-hard coded: red, green, blue potions, prices (for now)
 
-    print(f"Selling {num_green_potions} green potions at {60} gold each.")
-
-    # hard coded:
-        # assumed to be all green potions
-        # prices (for now), for small profit
     catalog = []
+    if num_red_potions > 0:
+        print(f"Selling {num_red_potions} red potions at {50} gold each.")
+        catalog.append({
+            "sku": "RED_POTION_0",
+            "name": "red potion",
+            "quantity": {num_red_potions},
+            "price": 50,
+            "potion_type": [100, 0, 0, 0],
+        })
     if num_green_potions > 0:
+        print(f"Selling {num_green_potions} green potions at {60} gold each.")
         catalog.append({
             "sku": "GREEN_POTION_0",
             "name": "green potion",
@@ -40,22 +36,15 @@ def get_catalog():
             "price": 60,
             "potion_type": [0, 100, 0, 0],
         })
+    if num_blue_potions > 0:
+        print(f"Selling {num_blue_potions} blue potions at {80} gold each.")
+        catalog.append({
+            "sku": "BLUE_POTION_0",
+            "name": "blue potion",
+            "quantity": {num_blue_potions},
+            "price": 80,
+            "potion_type": [0, 0, 100, 0],
+        })
 
-    return catalog # return empty dictionary?
+    return catalog
 
-    # return [
-    #         # {
-    #         #     "sku": "GREEN_POTION_0",
-    #         #     "name": "greeen potion",
-    #         #     "quantity": 1,
-    #         #     "price": 100,
-    #         #     "potion_type": [0, 0, 100, 0],
-    #         # },
-    #         {
-    #             "sku": "RED_POTION_0",
-    #             "name": "red potion",
-    #             "quantity": 1,
-    #             "price": 50,
-    #             "potion_type": [100, 0, 0, 0],
-    #         }
-    #     ]

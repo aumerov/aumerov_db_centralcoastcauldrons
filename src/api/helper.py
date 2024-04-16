@@ -59,7 +59,7 @@ def potion_status():
     num_blue_potions = inventory_dict.get('blue_ml', 0)
     num_dark_potions = inventory_dict.get('dark_ml', 0)
 
-    return num_red_potions, num_green_potions, num_blue_potions, 
+    return num_red_potions, num_green_potions, num_blue_potions, num_dark_potions
 
 
 # 

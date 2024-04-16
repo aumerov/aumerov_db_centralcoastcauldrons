@@ -27,47 +27,36 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
+    # Semi-hard coded to bottle red, green, blue potions.
+
     with db.engine.begin() as connection:
+        gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
+        num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
 
-        # SELECT to grab table
-        sql_to_execute = \
-            """SELECT * 
-            FROM global_inventory
-            """
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+        update_commands = []
 
-        # hard coding for now
-        data = result.fetchall() 
-        print("Bottler delivery")
-        print("Table contents: ", data) 
-        num_green_potions = data[0][0]
-        num_green_ml = data[0][1]
-        gold = data[0][2]
+        for potion in potions_delivered:
+            if potion.potion_type == [100,0,0,0]: # if brewed red potions
+                update_commands.append(f"UPDATE global_inventory SET quantity = {num_red_ml} - {100 * potion.quantity} WHERE item = 'red_ml'")
+                update_commands.append(f"UPDATE potion_inventory SET quantity = {num_red_potions} + {potion.quantity} WHERE item = 'red_potion'")
 
-        for potion in potions_delivered:  # assuming 5 (hard coded)
-            potions_brewed = potion.quantity
+            elif potion.potion_type == [0,100,0,0]: # if brewed green potions
+                update_commands.append(f"UPDATE global_inventory SET quantity = {num_green_ml} - {100 * potion.quantity} WHERE item = 'green_ml'")
+                update_commands.append(f"UPDATE potion_inventory SET quantity = {num_green_potions} + {potion.quantity} WHERE item = 'green_potion'")
 
-        if num_green_ml >= 100:  # can brew more potions
-            # UPDATE
-            sql_to_execute = \
-                f"""UPDATE global_inventory
-                SET num_green_ml = {num_green_ml - (potions_brewed * 100)},
-                num_green_potions = {num_green_potions + potions_brewed};
-                """
-            result = connection.execute(sqlalchemy.text(sql_to_execute))
+            elif potion.potion_type == [0,0,100,0]: # if brewed blue potions
+                update_commands.append(f"UPDATE global_inventory SET quantity = {num_blue_ml} - {100 * potion.quantity} WHERE item = 'blue_ml'")
+                update_commands.append(f"UPDATE potion_inventory SET quantity = {num_blue_potions} + {potion.quantity} WHERE item = 'blue_potion'")
 
-            # check updated table
-            sql_to_execute = \
-                """SELECT * 
-                FROM global_inventory
-                
-                """
-            result = connection.execute(sqlalchemy.text(sql_to_execute))
-
-            data = result.fetchall() 
-            print("Potion brew result: ", data) 
+        # execute all   
+        for command in update_commands:
+            connection.execute(sqlalchemy.text(command))
+    
+    # check updated table
+    global_status()
 
     return "OK"
+
 
 
 
@@ -82,38 +71,44 @@ def get_bottle_plan():
     Go from barrel to bottle.
     """
 
-    # Each bottle has a quantity of what proportion of red, blue, and
-    # green potion to add.
-    # Expressed in integers from 1 to 100 that must sum up to 100.
-    with db.engine.begin() as connection:
-        sql_to_execute = \
-            """SELECT * 
-            FROM global_inventory
-            """
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+    gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status()
+    num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status()
 
-        # hard coding for now
-        data = result.fetchall() 
-        print("Bottler plan")
-        print("Table contents: ", data) 
-        num_green_potions = data[0][0]
-        num_green_ml = data[0][1]
-        gold = data[0][2]
+    potions_brewed = []
+    num_red_brewed = 0
+    num_green_brewed = 0
+    num_blue_brewed = 0
+    # num_dark_brewed = 0
 
-        # V1 logic: bottle all barrels into green potions.
-        potions_brewed = []
-        num_potions_brewed = 0
-        if num_green_ml > 0:
-            num_potions_brewed = math.floor(num_green_ml / 100) # 100ml per potion
-
-            potions_brewed.append({
-                "potion_type": [0, 100, 0, 0],
-                "quantity": num_potions_brewed,
+    # Semi-hard coded to bottle red, green, blue potions.
+    # For now, bottling everything possible (no worry about inventory cap yet)
+    
+    if num_red_ml >= 100:
+        num_red_brewed = math.floor(num_red_ml / 100)
+        potions_brewed.append({
+                "potion_type": [100, 0, 0, 0],
+                "quantity": num_red_brewed,
             })
+    if num_green_ml >= 100:
+        num_green_brewed = math.floor(num_green_ml / 100)
+        potions_brewed.append({
+                "potion_type": [0, 100, 0, 0],
+                "quantity": num_green_brewed,
+            })
+    if num_blue_ml >= 100:
+        num_blue_brewed = math.floor(num_blue_ml / 100)
+        potions_brewed.append({
+                "potion_type": [0, 0, 100, 0],
+                "quantity": num_blue_brewed,
+            })
+    # if num_dark_ml >= 100:
+    #     num_dark_brewed = math.floor(num_dark_ml / 100)
+    #     potions_brewed.append({
+    #             "potion_type": [0, 0, 0, 100],
+    #             "quantity": num_dark_brewed,
+    #         })
 
-    print(f"Brewing {num_potions_brewed} green potions")
-
-    # Initial logic: bottle all barrels into red potions.
+    print(potions_brewed)
     return potions_brewed
 
 
