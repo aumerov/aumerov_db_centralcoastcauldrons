@@ -199,8 +199,8 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
-    profit = int(cart_checkout.payment)
-    print(f"Checkout called for cart_id {cart_id}. Payment received: {profit}")
+    # profit = int(cart_checkout.payment)    # NOT what this is
+    print(f"Checkout called for cart_id {cart_id}.")
     with db.engine.begin() as connection:
 
         # Retrieve cart items
@@ -250,9 +250,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
 
 
-        if total_cost != profit: # double check everything matches
-            print("ERROR, mismatch between gold received and calculated cost.")
-            print(f"Received {profit} gold, calculated cost was {total_cost} gold.")
+        # if total_cost != profit: # double check everything matches
+        #     print("ERROR, mismatch between gold received and calculated cost.")
+        #     print(f"Received {profit} gold, calculated cost was {total_cost} gold.")
 
         # Update global inventory for gold
         sql_to_execute = sqlalchemy.text("""
@@ -260,7 +260,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             SET quantity = quantity + :profit
             WHERE name = 'gold'
         """)
-        connection.execute(sql_to_execute, {'profit': profit})
+        connection.execute(sql_to_execute, {'profit': total_cost})
 
     return {"total_potions_bought": total_quantity, "total_gold_paid": total_cost}
 
