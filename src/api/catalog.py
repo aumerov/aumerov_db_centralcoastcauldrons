@@ -11,40 +11,41 @@ def get_catalog():
     """
     Each unique item combination must have only a single price.
     """
+    print("Catalog called")
     with db.engine.begin() as connection:
-        gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
-        num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
+        # gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
+        # num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
+        
+        query = sqlalchemy.text(f"SELECT * FROM potion_inventory")
+        result = connection.execute(query)
+        data = result.fetchall()
+        # print("Current potion inventory: ", data) 
 
-    # semi-hard coded: red, green, blue potions, prices (for now)
+        columns = [col for col in result.keys()]
+        # print("Columns:", columns)
 
-    catalog = []
-    if num_red_potions > 0:
-        print(f"Selling {num_red_potions} red potions at {50} gold each.")
-        catalog.append({
-            "sku": "RED_POTION_0",
-            "name": "red potion",
-            "quantity": {num_red_potions},
-            "price": 50,
-            "potion_type": [100, 0, 0, 0],
-        })
-    if num_green_potions > 0:
-        print(f"Selling {num_green_potions} green potions at {60} gold each.")
-        catalog.append({
-            "sku": "GREEN_POTION_0",
-            "name": "green potion",
-            "quantity": {num_green_potions},
-            "price": 60,
-            "potion_type": [0, 100, 0, 0],
-        })
-    if num_blue_potions > 0:
-        print(f"Selling {num_blue_potions} blue potions at {80} gold each.")
-        catalog.append({
-            "sku": "BLUE_POTION_0",
-            "name": "blue potion",
-            "quantity": {num_blue_potions},
-            "price": 80,
-            "potion_type": [0, 0, 100, 0],
-        })
+        ### TODO: dynamically change prices here
+
+        catalog = []
+        for row in data:
+            sku = row[columns.index('sku')]
+            name = row[columns.index('name')]
+            quantity = row[columns.index('quantity')]
+            price = row[columns.index('price')]
+            type = [row[columns.index('red_content')], 
+                    row[columns.index('green_content')], 
+                    row[columns.index('blue_content')], 
+                    row[columns.index('dark_content')]]
+
+            if quantity > 0:
+                print(f"Selling {quantity} {name}s at {price} gold each.")
+                catalog.append({
+                    "sku": sku,
+                    "name": name,
+                    "quantity": quantity,
+                    "price": price,
+                    "potion_type": type,
+                })
 
     return catalog
 

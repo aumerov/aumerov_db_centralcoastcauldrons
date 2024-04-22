@@ -23,7 +23,41 @@ class Barrel(BaseModel):
     quantity: int
 
 
+### notes 4.17
+# can use barrel_delivered.price
 
+# "INSERT INTO processed (job_id, type) VALUES (:order_id, 'barrels')",
+#     [{"order_id": order_id}]
+# }
+# except IntegrityError as e:
+#     return "OK"
+
+# "order_id": order_id)]
+
+
+# use: 
+# elif barrel_delivered.potion_type == [1,0,0,0] for different barrels
+# ...
+# else: raise Exception("Invalid potion type")
+####### better to fail fast -> be code to be more explicit about what it's expecting (throw errors if not)
+
+# dont have to call db again: values are updated (assume update is right)
+# print("gold paid: {gold_paid} red_ml: {red_ml} ...")
+
+# colon :
+# signals it's a variable binded from the outside worls
+# why not fstring? SQL injection attacks
+
+# instead:
+# """
+# UPDATE globals SET
+# red_ml = red_ml + :red_ml
+# ...
+# gold = gold - :gold_paid
+# """),
+# [{"red_ml": red_ml, ..., "gold_paid" = gold_paid}]
+
+# can bulk INSERT by putting dictionary^^^ in more than once. Makes sense for insert but not update
 
 
 
@@ -112,8 +146,24 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
 
 
 
+### notes 4.17
+# not one right way to do it, can be creative here
 
+# control variables - to control logic, so don;t have to redeploy to tweak value
+    # static variable in db
+    # threshold_normal, threshold_large, ml_capacity
 
+# different logic for large vs normal size barrels
+
+# inventory scheme -> lookup
+# ((PHOTO))
+
+# threshold = ml_threshold_large if selling_large else ml_threshold_normal
+# for i, ml in enumerate(ml_inventory):
+# if ml < threshold:
+    # buy up to get back to threshold
+
+# calculate_barrel_to_purchase 
 
 
 

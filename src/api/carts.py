@@ -81,26 +81,60 @@ def post_visits(visit_id: int, customers: list[Customer]):
     """
     Which customers visited the shop today?
     """
-    print(customers)
+    print("Visited today: ", customers)
 
     return "OK"
 
 
+
+### Keeping track of adventurers as well as creating carts.
 @router.post("/")
-def create_cart(new_cart: Customer):
+def create_cart(new_customer: Customer): # renamed from new_cart becuase that made no sense
     """ """
-    
-    # using a global log.txt file to count. Code from Stack Overflow
-    with open('src/log.txt','r') as f:
-        counter = int(f.read())
-        counter += 1 
-    with open('src/log.txt','w') as f:
-        f.write(str(counter))
+    print("Create_cart called by: ", new_customer)
+    with db.engine.begin() as connection:
 
-    print(counter)
-    return {"cart_id": counter}
+        # if adventurer already exists
+        sql_to_execute = """
+            SELECT adventurer_id 
+            FROM adventurers 
+            WHERE name = :name 
+            AND character_class = :character_class 
+            AND level = :level
+        """
+        result = connection.execute(sqlalchemy.text(sql_to_execute), {
+            'name': new_customer.customer_name, 
+            'character_class': new_customer.character_class, 
+            'level': new_customer.level
+        }).fetchone()
 
-    # sql_to_execute = "INSERT INTO orders (id) VALUES "
+        # if not, create one 
+        if result is None:
+            print("New customer!")
+            sql_to_execute = """
+                INSERT INTO adventurers (name, character_class, level)
+                VALUES (:name, :character_class, :level)
+                RETURNING adventurer_id
+            """
+            result = connection.execute(sqlalchemy.text(sql_to_execute), {
+                'name': new_customer.customer_name, 
+                'character_class': new_customer.character_class, 
+                'level': new_customer.level
+            }).fetchone()
+
+        # create new cart, tied to adventurer        # HARD CODED WOW sorry it wasn't working any other way, the type errors were insane
+        adventurer_id_str = str(result).strip('(),')
+        adventurer_id = int(adventurer_id_str)
+        print("Adventurer id: ", adventurer_id)
+
+        sql_to_execute = "INSERT INTO carts (adventurer_id) VALUES (:adventurer_id) RETURNING cart_id"
+        cart_result = connection.execute(sqlalchemy.text(sql_to_execute), {'adventurer_id': adventurer_id}).fetchone()
+
+        cart_id_str = str(cart_result).strip('(),')
+        cart_id = int(cart_id_str)
+        print("Cart id: ", cart_id)
+
+        return {"cart_id": cart_id}
 
 
 class CartItem(BaseModel):
@@ -110,34 +144,48 @@ class CartItem(BaseModel):
 
 
 
+
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
+    if cart_item.quantity == 0: # double check
+        return "OK"
+
     with db.engine.begin() as connection:
-        gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
-        num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
+        # gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
+        # num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
         
-        # hard coding to 1 item (red, green or blue potion) per cart, for now
-        if cart_item.quantity > 1:
-            cart_item.quantity = 1
+        query = sqlalchemy.text(f"SELECT * FROM potion_inventory")
+        result = connection.execute(query)
+        data = result.fetchall()
+        print("Current potion inventory: ", data) 
 
-        # NOT FINISHED HERE.
-        # I realized I am not sure how this works, so I will hold off and hope other work gets partial credit.
-        # What does this function do? How does it get its information to checkout() ?
-        # 
+        columns = [col for col in result.keys()]
+        print("Columns:", columns)
 
-        
+        for row in data:
+            quantity = row[columns.index('quantity')]
+            price = row[columns.index('price')]
+            sku = row[columns.index('sku')]
+            print(f"Inventory item: SKU {sku}, Quantity {quantity}, Price {price}")
 
-        # if item_sku == 'RED_POTION_0':
-        #     num_red = cart_item.quantity
-        #     return
-        # elif item_sku == 'GREEN_POTION_0':
-        #     num_green = cart_item.quantity
-        #     return
-        # elif item_sku == 'BLUE_POTION_0':
-        #     num_blue = cart_item.quantity
-        #     return
-
+            if item_sku == sku: # item to add to cart
+                if (cart_item.quantity > quantity) or (quantity == 0):
+                    print("Insufficient Stock.")
+                    return "Insufficient Stock."
+                
+                # add to cart_items
+                sql_to_execute = """
+                    INSERT INTO cart_items (cart_id, sku, quantity, current_price)
+                    VALUES (:cart_id, :sku, :quantity, :current_price)
+                """
+                result = connection.execute(sqlalchemy.text(sql_to_execute), {
+                    'cart_id': cart_id, 
+                    'sku': sku, 
+                    'quantity': cart_item.quantity,
+                    'current_price': price
+                })
+                break
     return "OK"
 
 
@@ -151,23 +199,99 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
-    # profit = int(cart_checkout.payment)
-
+    profit = int(cart_checkout.payment)
+    print(f"Checkout called for cart_id {cart_id}. Payment received: {profit}")
     with db.engine.begin() as connection:
-        gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
-        num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
+
+        # Retrieve cart items
+        sql_to_execute = """
+            SELECT sku, quantity, current_price
+            FROM cart_items
+            WHERE cart_id = :cart_id
+        """
+        cart_items = connection.execute(sqlalchemy.text(sql_to_execute), {'cart_id': cart_id}).fetchall()
+        print("Cart: ", cart_items)
 
 
-        # UPDATE
-        # price still hard coded at 50/60/80 for R/G/B. Assuming we sold 1 green potion
-        sql_to_execute = \
-            f"""UPDATE global_inventory
-            SET num_green_potions = {num_green_potions - 1},
-            gold = {gold + 60};
+        # Update potion inventory and calculate total cost
+        total_cost = 0 # keep track locally
+        total_quantity = 0
+        for item in cart_items:   # TODO: do this better, call once instead of in the loop.
+            purchase_quantity = item.quantity
+            purchase_price = item.current_price
+            sku = item.sku
+
+            # Check potion inventory
+            sql_to_execute = """
+                SELECT quantity
+                FROM potion_inventory
+                WHERE sku = :sku
             """
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+            potion = connection.execute(sqlalchemy.text(sql_to_execute), {'sku': sku}).fetchone()
+            # print("Potion: ", potion, type(potion))
+            inventory_stock = 0
+            if potion is not None:
+                inventory_stock = potion[0]
+                # print(inventory_stock)
 
-        # check updated table
-        global_status() 
+            if inventory_stock < purchase_quantity:
+                return "Insufficient stock for potion."
+            
+            total_quantity += purchase_quantity
+            total_cost += purchase_price * purchase_quantity
 
-    return {"total_potions_bought": 1, "total_gold_paid": 60}
+            # Update potion inventory
+            sql_to_execute = sqlalchemy.text("""
+                UPDATE potion_inventory
+                SET quantity = quantity - :quantity
+                WHERE sku = :sku
+            """)
+            connection.execute(sql_to_execute, {'quantity': item.quantity, 'sku': sku})
+
+
+
+        if total_cost != profit: # double check everything matches
+            print("ERROR, mismatch between gold received and calculated cost.")
+            print(f"Received {profit} gold, calculated cost was {total_cost} gold.")
+
+        # Update global inventory for gold
+        sql_to_execute = sqlalchemy.text("""
+            UPDATE global_inventory
+            SET quantity = quantity + :profit
+            WHERE name = 'gold'
+        """)
+        connection.execute(sql_to_execute, {'profit': profit})
+
+    return {"total_potions_bought": total_quantity, "total_gold_paid": total_cost}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #     gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
+    #     num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
+
+
+    #     # UPDATE
+    #     # price still hard coded at 50/60/80 for R/G/B. Assuming we sold 1 red potion
+    #     sql_to_execute = \
+    #         f"""UPDATE global_inventory
+    #         SET num_red_potions = {num_red_potions - 1},
+    #         gold = {gold + 50};
+    #         """
+    #     result = connection.execute(sqlalchemy.text(sql_to_execute))
+
+    #     # check updated table
+    #     global_status() 
+
+    # return {"total_potions_bought": 1, "total_gold_paid": 60}
