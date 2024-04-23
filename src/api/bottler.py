@@ -33,7 +33,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         # num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
 
         ml_used = {'red_ml': 0, 'green_ml': 0, 'blue_ml': 0, 'dark_ml': 0}
-        update_commands = []
+        # update_commands = []
 
         # it's late...                ...             ... and chatGPT recommended I combine my 16 different SQL color inventory queries into one. I did it, of course, because if AI told me to jump off a bridge I would.
         for potion in potions_delivered:
@@ -87,9 +87,9 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             connection.execute(sqlalchemy.text(update_command), {'deducted': ml_deducted, 'color': color})
 
 
-        # execute all   
-        for command in update_commands:
-            connection.execute(sqlalchemy.text(command))
+        # # execute all   
+        # for command in update_commands:
+        #     connection.execute(sqlalchemy.text(command))
     
     # check updated global table
     global_status()
