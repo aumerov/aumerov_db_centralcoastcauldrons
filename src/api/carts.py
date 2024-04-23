@@ -248,12 +248,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             """)
             connection.execute(sql_to_execute, {'quantity': item.quantity, 'sku': sku})
 
-
-
-        # if total_cost != profit: # double check everything matches
-        #     print("ERROR, mismatch between gold received and calculated cost.")
-        #     print(f"Received {profit} gold, calculated cost was {total_cost} gold.")
-
         # Update global inventory for gold
         sql_to_execute = sqlalchemy.text("""
             UPDATE global_inventory

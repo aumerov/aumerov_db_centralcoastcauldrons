@@ -5,6 +5,16 @@ from .helper import global_status, potion_status
 
 router = APIRouter()
 
+##Note from class
+# SELECT inv, sku, type, price from potion_catalog
+# # Not a table - this is a VIEW
+# ### 
+# for row in results:
+#     catalog.append({}"sku": row.sku, "quantity": row.inventory, ...})
+
+# put hardcoded logic in database - not here.
+
+# max 6 potions in catalog
 
 @router.get("/catalog/", tags=["catalog"])
 def get_catalog():
