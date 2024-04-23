@@ -27,10 +27,10 @@ def get_inventory():
             FROM potion_inventory
         """
         potions_result = connection.execute(sqlalchemy.text(sql_to_execute)).fetchall()
-        print(potions_result)
+        # print(potions_result)
         if potions_result is not None:
             total_potions = sum(potion.quantity for potion in potions_result)
-            print(f"Total potions: {total_potions}")
+            # print(f"Total potions: {total_potions}")
 
 
 
