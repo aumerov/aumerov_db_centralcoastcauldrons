@@ -25,7 +25,7 @@ def global_status():
     print("Current global inventory: ", data) 
 
     # Manually build a dictionary. Hard coded for name : quantity
-    inventory_dict = {item[1]: item[0] for item in data}
+    inventory_dict = {item[1]: item[2] for item in data}
 
     gold = inventory_dict.get('gold', 0)
     num_red_ml = inventory_dict.get('red_ml', 0)
@@ -35,6 +35,8 @@ def global_status():
     
 
     return gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml
+
+
 
 
 
@@ -59,11 +61,11 @@ def potion_status():
     num_blue_potions = inventory_dict.get('blue_potion', 0)
     num_dark_potions = inventory_dict.get('dark_potion', 0)
 
-    print(num_red_potions, num_green_potions, num_blue_potions, num_dark_potions)
+    # print(num_red_potions, num_green_potions, num_blue_potions, num_dark_potions)
     return num_red_potions, num_green_potions, num_blue_potions, num_dark_potions
 
 
-# returns a dictionary of items, keyed by SKU 
+# returns a dictionary of items, keyed by SKU. Used for wholesale barrel catalog
 def itemize(catalog):
     barrel_dict = {}
     for barrel in catalog:

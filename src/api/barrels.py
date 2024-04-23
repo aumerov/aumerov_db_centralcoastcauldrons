@@ -71,55 +71,63 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
 
     with db.engine.begin() as connection:
         gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
-        num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status()  
+        # num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status()  
 
-        if gold == 0:   # for testing purposes
-            return "OK"
-
-        # Semi-hard coded to purchase small red, green, blue barrels.
         # Assuming barrel plan is valid.
 
-        curr_gold = gold    # copy of gold just in case
         purchase_plan = itemize(barrels_delivered)
-        red_purchasing = 0
-        green_purchasing = 0
-        blue_purchasing = 0
-        red_price = 0
-        green_price = 0
-        blue_price = 0
-        
-        # # Update quantities based on purchase plan. Initialized above to reduce risk of errors.
-        # red_purchasing = purchase_plan['SMALL_RED_BARREL'].quantity
-        # green_purchasing = purchase_plan['SMALL_GREEN_BARREL'].quantity
-        # blue_purchasing = purchase_plan['SMALL_BLUE_BARREL'].quantity
-        # red_price = purchase_plan['SMALL_RED_BARREL'].price
-        # green_price = purchase_plan['SMALL_GREEN_BARREL'].price
-        # blue_price = purchase_plan['SMALL_BLUE_BARREL'].price
+        print("Purchase plan: ", purchase_plan)
 
 
         # Modularizing SQL UPDATE code
         update_commands = []
+        ml_inventory = [num_red_ml, num_green_ml, num_blue_ml, num_dark_ml]
+        initial_gold = gold
 
-        for barrel in barrels_delivered:
-            if barrel.sku == 'SMALL_RED_BARREL': # if bought red barrels
-                red_purchasing = purchase_plan['SMALL_RED_BARREL'].quantity
-                red_price = purchase_plan['SMALL_RED_BARREL'].price
-                curr_gold -= red_purchasing * red_price
-                update_commands.append(f"UPDATE global_inventory SET quantity = {num_red_ml} + {red_purchasing * purchase_plan['SMALL_RED_BARREL'].ml_per_barrel} WHERE item = 'red_ml'")
+        # definitely, totally, 100% came up with this myself with no outside help, at all, ever
+        for i, ml in enumerate(ml_inventory):
+            inventory_barrel_type = [int(j == i) for j in range(4)]
+            print("Type of barrel to purchase: ", inventory_barrel_type)
 
-            elif barrel.sku == 'SMALL_GREEN_BARREL': # if bought green barrels
-                green_purchasing = purchase_plan['SMALL_GREEN_BARREL'].quantity
-                green_price = purchase_plan['SMALL_GREEN_BARREL'].price
-                curr_gold -= green_purchasing * green_price
-                update_commands.append(f"UPDATE global_inventory SET quantity = {num_green_ml} + {green_purchasing * purchase_plan['SMALL_GREEN_BARREL'].ml_per_barrel} WHERE item = 'green_ml'")
 
-            elif barrel.sku == 'SMALL_BLUE_BARREL': # if bought blue barrels
-                blue_purchasing = purchase_plan['SMALL_BLUE_BARREL'].quantity
-                blue_price = purchase_plan['SMALL_BLUE_BARREL'].price
-                curr_gold -= blue_purchasing * blue_price
-                update_commands.append(f"UPDATE global_inventory SET quantity = {num_blue_ml} + {blue_purchasing * purchase_plan['SMALL_BLUE_BARREL'].ml_per_barrel} WHERE item = 'blue_ml'")
+            for barrel_key in purchase_plan:
+                barrel = purchase_plan[barrel_key] 
+                if barrel.potion_type == inventory_barrel_type: # bought that type of barrel
+                    gold -= barrel.quantity * barrel.price
+                    update_commands.append(f"""UPDATE global_inventory 
+                                           SET quantity = quantity + {barrel.quantity * barrel.ml_per_barrel} 
+                                           WHERE id = {i + 2}""")   # no time to parameterize
 
-        update_commands.append(f"UPDATE global_inventory SET quantity = {curr_gold} WHERE item = 'gold'") # update gold last
+        update_commands.append(f"UPDATE global_inventory SET quantity = {gold} WHERE name = 'gold'") # update gold last
+
+        # execute all
+        for command in update_commands:
+            connection.execute(sqlalchemy.text(command))
+
+        # check updated table
+        global_status()
+
+    return "OK"
+            
+        #     if barrel.sku == 'SMALL_RED_BARREL': # if bought red barrels
+        #         red_purchasing = purchase_plan['SMALL_RED_BARREL'].quantity
+        #         red_price = purchase_plan['SMALL_RED_BARREL'].price
+        #         curr_gold -= red_purchasing * red_price
+        #         update_commands.append(f"UPDATE global_inventory SET quantity = {num_red_ml} + {red_purchasing * purchase_plan['SMALL_RED_BARREL'].ml_per_barrel} WHERE name = 'red_ml'")
+
+        #     elif barrel.sku == 'SMALL_GREEN_BARREL': # if bought green barrels
+        #         green_purchasing = purchase_plan['SMALL_GREEN_BARREL'].quantity
+        #         green_price = purchase_plan['SMALL_GREEN_BARREL'].price
+        #         curr_gold -= green_purchasing * green_price
+        #         update_commands.append(f"UPDATE global_inventory SET quantity = {num_green_ml} + {green_purchasing * purchase_plan['SMALL_GREEN_BARREL'].ml_per_barrel} WHERE name = 'green_ml'")
+
+        #     elif barrel.sku == 'SMALL_BLUE_BARREL': # if bought blue barrels
+        #         blue_purchasing = purchase_plan['SMALL_BLUE_BARREL'].quantity
+        #         blue_price = purchase_plan['SMALL_BLUE_BARREL'].price
+        #         curr_gold -= blue_purchasing * blue_price
+        #         update_commands.append(f"UPDATE global_inventory SET quantity = {num_blue_ml} + {blue_purchasing * purchase_plan['SMALL_BLUE_BARREL'].ml_per_barrel} WHERE name = 'blue_ml'")
+
+        # update_commands.append(f"UPDATE global_inventory SET quantity = {curr_gold} WHERE name = 'gold'") # update gold last
 
         # if red_purchasing > 0: # if bought red barrels
         #     curr_gold -= red_purchasing * red_price
@@ -134,14 +142,17 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
         #     update_commands.append(f"num_blue_ml = {num_blue_ml} + {blue_purchasing * purchase_plan['SMALL_BLUE_BARREL'].ml_per_barrel}")
         
 
-        # execute all
-        for command in update_commands:
-            connection.execute(sqlalchemy.text(command))
+    #     # execute all
+    #     for command in update_commands:
+    #         connection.execute(sqlalchemy.text(command))
 
-        # check updated table
-        global_status()
+    #     # check updated table
+    #     global_status()
 
-    return "OK"
+    # return "OK"
+
+
+
 
 
 
@@ -164,6 +175,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
     # buy up to get back to threshold
 
 # calculate_barrel_to_purchase 
+###
 
 
 
@@ -171,46 +183,58 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):  # har
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
+    print("Barrel plan / Barrels plan called")
     print("CATALOG")
     print(wholesale_catalog)
 
-    gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status()   # I know, I know, I will stop using these helpers soon.
+    gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status()   # I know, I know, I will stop using these hard-coded helpers soon.
     # num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status()
     catalog = itemize(wholesale_catalog)
-
-    with db.engine.begin() as connection:
-
-        # sql_to_execute = "SELECT * FROM potion_inventory"
-        # result = connection.execute(sqlalchemy.text(sql_to_execute))
-        # data = result.fetchall()
-        # print("Current potion inventory: ", data) 
-
-        # columns = [col for col in result.keys()]
-        # print("Columns:", columns)
-
-        # # iterate through all potions (helper function here?)
-        # for row in data:
-        #     quantity = row[columns.index('quantity')]
-        #     price = row[columns.index('price')]
-        #     sku = row[columns.index('sku')]
-        #     print(f"Potion Inventory item: SKU {sku}, Quantity {quantity}, Price {price}")
+    # print("Itemized catalog: ", catalog)
 
 
-
-        ml_threshold = 100
-
-
-
-
-
+    ml_inventory = [num_red_ml, num_green_ml, num_blue_ml, num_dark_ml]
+    current_total_ml = sum(ml_inventory)
+    threshold = 250
+    initial_gold = gold            # copy of gold just in case
+    barrels_to_purchase = []    # final purchase plan
 
 
+    # definitely, totally, 100% came up with this myself with no outside help, at all, ever
+    for i, ml in enumerate(ml_inventory):  # that being said, this is way more difficult than the other ways to do this.
+        # print (i, ml)
+        if ml <= threshold:
+            barrel_type_to_buy = [int(j == i) for j in range(4)]
+            print("Potion type below threshold: ", barrel_type_to_buy)
 
-    #     # Semi-hard coded to purchase small red, green, blue barrels.
-    #     # logic: 
-    #         # buy as many blue barrels as possible.
-    #         # buy one red barrel.
-    #         # buy as many green barrels as possible with gold left.
+            # buy a potion of that type. Logic will implicitly start with red > green > blue > dark.
+            # Buy one small barrel at a time
+
+            # check catalog for small barrel of that type
+            for key, barrel in catalog.items():
+                if key.startswith('SMALL'):  # small barrels only, for now
+                    # print("entry: ", key)
+                    if barrel_type_to_buy == barrel.potion_type:
+                        if gold >= barrel.price:
+                            # print("Buying one!")
+                            gold -= barrel.price
+                            barrels_to_purchase.append({
+                                "sku": key,
+                                "quantity": 1
+                            })
+
+    # extra gold remaining 
+    # todo: implement. will do when more time
+
+    print(f"Plan: {barrels_to_purchase}")
+    return barrels_to_purchase
+
+
+        # Semi-hard coded to purchase small red, green, blue barrels.
+        # logic: 
+            # buy as many blue barrels as possible.
+            # buy one red barrel.
+            # buy as many green barrels as possible with gold left.
 
     #     barrels_to_purchase = []    # final purchase plan
     #     curr_gold = gold            # copy of gold just in case
@@ -255,11 +279,3 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     # print(f"Plan: {barrels_to_purchase}")
 
     # return barrels_to_purchase
-    return [{
-                "sku": "SMALL_RED_BARREL",
-                "quantity": 1
-            },
-            {
-                "sku": "SMALL_GREEN_BARREL",
-                "quantity": 1
-            }]
