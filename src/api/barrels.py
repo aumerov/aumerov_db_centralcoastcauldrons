@@ -174,55 +174,92 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print("CATALOG")
     print(wholesale_catalog)
 
-    gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status()
-    num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status()
+    gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status()   # I know, I know, I will stop using these helpers soon.
+    # num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status()
     catalog = itemize(wholesale_catalog)
+
+    with db.engine.begin() as connection:
+
+        # sql_to_execute = "SELECT * FROM potion_inventory"
+        # result = connection.execute(sqlalchemy.text(sql_to_execute))
+        # data = result.fetchall()
+        # print("Current potion inventory: ", data) 
+
+        # columns = [col for col in result.keys()]
+        # print("Columns:", columns)
+
+        # # iterate through all potions (helper function here?)
+        # for row in data:
+        #     quantity = row[columns.index('quantity')]
+        #     price = row[columns.index('price')]
+        #     sku = row[columns.index('sku')]
+        #     print(f"Potion Inventory item: SKU {sku}, Quantity {quantity}, Price {price}")
+
+
+
+        ml_threshold = 100
+
+
+
+
+
+
+
+
+    #     # Semi-hard coded to purchase small red, green, blue barrels.
+    #     # logic: 
+    #         # buy as many blue barrels as possible.
+    #         # buy one red barrel.
+    #         # buy as many green barrels as possible with gold left.
+
+    #     barrels_to_purchase = []    # final purchase plan
+    #     curr_gold = gold            # copy of gold just in case
+    #     available_red = catalog['SMALL_RED_BARREL'].quantity
+    #     available_green = catalog['SMALL_GREEN_BARREL'].quantity
+    #     available_blue = catalog['SMALL_BLUE_BARREL'].quantity
+    #     red_price = catalog['SMALL_RED_BARREL'].price
+    #     green_price = catalog['SMALL_GREEN_BARREL'].price
+    #     blue_price = catalog['SMALL_BLUE_BARREL'].price
+    #     red_purchasing = 0
+    #     green_purchasing = 0
+    #     blue_purchasing = 0
+
+    #     if (curr_gold >= blue_price) & (available_blue >= 1): # buy as many blue barrels as possible
+    #         blue_purchasing = math.floor(curr_gold / blue_price)
+    #         if blue_purchasing > available_blue:
+    #             blue_purchasing = available_blue
+    #         barrels_to_purchase.append({
+    #             "sku": "SMALL_BLUE_BARREL",
+    #             "quantity": blue_purchasing
+    #         })
+    #         curr_gold -= blue_price * blue_purchasing  # locally update gold
+
+    #     if (curr_gold >= red_price) & (available_red >= 1): # buy one red barrel, if possible
+    #         red_purchasing = 1
+    #         barrels_to_purchase.append({
+    #             "sku": "SMALL_RED_BARREL",
+    #             "quantity": red_purchasing
+    #         })
+    #         curr_gold -= red_price * red_purchasing # locally update gold
+
+    #     if (curr_gold >= green_price) & (available_green >= 1): # buy as many green barrels as possible
+    #         green_purchasing = math.floor(curr_gold / green_price)
+    #         if green_purchasing > available_green:
+    #             green_purchasing = available_green
+    #         barrels_to_purchase.append({
+    #             "sku": "SMALL_GREEN_BARREL",
+    #             "quantity": green_purchasing
+    #         })
+    #         curr_gold -= green_price * green_purchasing  # locally update gold
     
-    # Semi-hard coded to purchase small red, green, blue barrels.
-    # logic: 
-        # buy as many blue barrels as possible.
-        # buy one red barrel.
-        # buy as many green barrels as possible with gold left.
+    # print(f"Plan: {barrels_to_purchase}")
 
-    barrels_to_purchase = []    # final purchase plan
-    curr_gold = gold            # copy of gold just in case
-    available_red = catalog['SMALL_RED_BARREL'].quantity
-    available_green = catalog['SMALL_GREEN_BARREL'].quantity
-    available_blue = catalog['SMALL_BLUE_BARREL'].quantity
-    red_price = catalog['SMALL_RED_BARREL'].price
-    green_price = catalog['SMALL_GREEN_BARREL'].price
-    blue_price = catalog['SMALL_BLUE_BARREL'].price
-    red_purchasing = 0
-    green_purchasing = 0
-    blue_purchasing = 0
-
-    if (curr_gold >= blue_price) & (available_blue >= 1): # buy as many blue barrels as possible
-        blue_purchasing = math.floor(curr_gold / blue_price)
-        if blue_purchasing > available_blue:
-            blue_purchasing = available_blue
-        barrels_to_purchase.append({
-            "sku": "SMALL_BLUE_BARREL",
-            "quantity": blue_purchasing
-        })
-        curr_gold -= blue_price * blue_purchasing  # locally update gold
-
-    if (curr_gold >= red_price) & (available_red >= 1): # buy one red barrel, if possible
-        red_purchasing = 1
-        barrels_to_purchase.append({
-            "sku": "SMALL_RED_BARREL",
-            "quantity": red_purchasing
-        })
-        curr_gold -= red_price * red_purchasing # locally update gold
-
-    if (curr_gold >= green_price) & (available_green >= 1): # buy as many green barrels as possible
-        green_purchasing = math.floor(curr_gold / green_price)
-        if green_purchasing > available_green:
-            green_purchasing = available_green
-        barrels_to_purchase.append({
-            "sku": "SMALL_GREEN_BARREL",
-            "quantity": green_purchasing
-        })
-        curr_gold -= green_price * green_purchasing  # locally update gold
-    
-    print(f"Plan: {barrels_to_purchase}")
-    return barrels_to_purchase
+    # return barrels_to_purchase
+    return [{
+                "sku": "SMALL_RED_BARREL",
+                "quantity": 1
+            },
+            {
+                "sku": "SMALL_GREEN_BARREL",
+                "quantity": 1
+            }]

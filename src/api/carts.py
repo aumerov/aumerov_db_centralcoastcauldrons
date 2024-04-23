@@ -155,14 +155,15 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         # gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
         # num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
         
-        query = sqlalchemy.text(f"SELECT * FROM potion_inventory")
-        result = connection.execute(query)
+        sql_to_execute = "SELECT * FROM potion_inventory"
+        result = connection.execute(sqlalchemy.text(sql_to_execute))
         data = result.fetchall()
         print("Current potion inventory: ", data) 
 
         columns = [col for col in result.keys()]
         print("Columns:", columns)
 
+        # iterate through all potions (helper function here?)
         for row in data:
             quantity = row[columns.index('quantity')]
             price = row[columns.index('price')]
