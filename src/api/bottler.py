@@ -25,6 +25,7 @@ class PotionInventory(BaseModel):
 @router.post("/deliver/{order_id}")
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
+    print("Potions delivered / bottler deliver called")
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
     with db.engine.begin() as connection:
@@ -97,20 +98,6 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 
 
 
-    for potion in potions_delivered:
-        if potion.potion_type == [100,0,0,0]: # if brewed red potions
-            update_commands.append(f"UPDATE global_inventory SET quantity = {num_red_ml} - {100 * potion.quantity} WHERE item = 'red_ml'")
-            update_commands.append(f"UPDATE potion_inventory SET quantity = {num_red_potions} + {potion.quantity} WHERE item = 'red_potion'")
-
-        elif potion.potion_type == [0,100,0,0]: # if brewed green potions
-            update_commands.append(f"UPDATE global_inventory SET quantity = {num_green_ml} - {100 * potion.quantity} WHERE item = 'green_ml'")
-            update_commands.append(f"UPDATE potion_inventory SET quantity = {num_green_potions} + {potion.quantity} WHERE item = 'green_potion'")
-
-        elif potion.potion_type == [0,0,100,0]: # if brewed blue potions
-            update_commands.append(f"UPDATE global_inventory SET quantity = {num_blue_ml} - {100 * potion.quantity} WHERE item = 'blue_ml'")
-            update_commands.append(f"UPDATE potion_inventory SET quantity = {num_blue_potions} + {potion.quantity} WHERE item = 'blue_potion'")
-
-
 
 
 
@@ -121,7 +108,7 @@ def get_bottle_plan():
     """
     Go from barrel to bottle.
     """
-
+    print("Potions plan / bottler plan called")
     gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status()
     # num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status()
 
