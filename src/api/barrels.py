@@ -223,8 +223,23 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 "quantity": 1
                             })
 
-    # extra gold remaining 
-    # todo: implement. will do when more time
+    # extra gold remaining: spend on random barrels, buy as much as possible.
+    min_price = math.inf
+    for key, barrel in catalog.items():
+        if barrel.price < min_price:
+            min_price = barrel.price
+
+    while gold >= min_price:   
+        for key, barrel in catalog.items():
+            if gold >= min_price:
+                gold -= barrel.price
+                barrels_to_purchase.append({
+                    "sku": key,
+                    "quantity": math.floor(gold / barrel.price)
+                })
+
+
+
 
     print(f"Plan: {barrels_to_purchase}")
     return barrels_to_purchase
