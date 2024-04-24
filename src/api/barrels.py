@@ -195,7 +195,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     ml_inventory = [num_red_ml, num_green_ml, num_blue_ml, num_dark_ml]
     current_total_ml = sum(ml_inventory)
-    threshold = 250
+    threshold = 1500
     initial_gold = gold            # copy of gold just in case
     barrels_to_purchase = []    # final purchase plan
 
@@ -223,6 +223,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 "quantity": 1
                             })
 
+    #---
     # extra gold remaining: spend on random barrels, buy as much as possible.
     min_price = math.inf
     for key, barrel in catalog.items():
@@ -237,7 +238,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     "sku": key,
                     "quantity": math.floor(gold / barrel.price)
                 })
-
+    #---
 
 
 

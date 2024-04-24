@@ -129,6 +129,7 @@ def get_bottle_plan():
 
         # Step 3: Iterate through potions and check if they can be created
         for potion in potion_recipes:
+            print("checking potion: ", potion)
             quantity_brewed = 0
             # Check if the potion can be created with the current ml_inventory. If so, create as many as possible.
             while (num_red_ml >= potion.red_content and
