@@ -195,7 +195,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     ml_inventory = [num_red_ml, num_green_ml, num_blue_ml, num_dark_ml]
     current_total_ml = sum(ml_inventory)
-    threshold = 2000
+    capacity = 10000  # max capacity until buy more
+    threshold = 1500
     initial_gold = gold            # copy of gold just in case
     barrels_to_purchase = []    # final purchase plan
 
@@ -215,12 +216,12 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 if key.startswith('SMALL'):  # small barrels only, for now
                     # print("entry: ", key)
                     if barrel_type_to_buy == barrel.potion_type:
-                        if gold >= barrel.price:
-                            # print("Buying one!")
-                            gold -= barrel.price
-                            quant = math.floor(gold / barrel.price)
+                        if gold >= barrel.price:                            
+                            # quant = math.floor(gold / barrel.price)
+                            quant = math.ceil(threshold / barrel.ml_per_barrel)  # buy up until threshold
                             if quant > barrel.quantity:
                                 quant = barrel.quantity
+                            gold -= barrel.price * quant
                             barrels_to_purchase.append({
                                 "sku": key,
                                 "quantity": quant
