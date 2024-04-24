@@ -195,7 +195,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     ml_inventory = [num_red_ml, num_green_ml, num_blue_ml, num_dark_ml]
     current_total_ml = sum(ml_inventory)
-    threshold = 1500
+    threshold = 2000
     initial_gold = gold            # copy of gold just in case
     barrels_to_purchase = []    # final purchase plan
 
@@ -219,27 +219,29 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                             # print("Buying one!")
                             gold -= barrel.price
                             quant = math.floor(gold / barrel.price)
+                            if quant > barrel.quantity:
+                                quant = barrel.quantity
                             barrels_to_purchase.append({
                                 "sku": key,
                                 "quantity": quant
                             })
 
-    #---
-    # extra gold remaining: spend on random barrels, buy as much as possible.
-    min_price = math.inf
-    for key, barrel in catalog.items():
-        if barrel.price < min_price:
-            min_price = barrel.price
+    # #---
+    # # extra gold remaining: spend on random barrels, buy as much as possible.
+    # min_price = math.inf
+    # for key, barrel in catalog.items():
+    #     if barrel.price < min_price:
+    #         min_price = barrel.price
 
-    while gold >= min_price:   
-        for key, barrel in catalog.items():
-            if gold >= min_price:
-                gold -= barrel.price
-                barrels_to_purchase.append({
-                    "sku": key,
-                    "quantity": math.floor(gold / barrel.price)
-                })
-    #---
+    # while gold >= min_price:   
+    #     for key, barrel in catalog.items():
+    #         if gold >= min_price:
+    #             gold -= barrel.price
+    #             barrels_to_purchase.append({
+    #                 "sku": key,
+    #                 "quantity": math.floor(gold / barrel.price)
+    #             })
+    # #---
 
 
 
