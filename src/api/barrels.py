@@ -218,9 +218,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         if gold >= barrel.price:
                             # print("Buying one!")
                             gold -= barrel.price
+                            quant = math.floor(gold / barrel.price)
                             barrels_to_purchase.append({
                                 "sku": key,
-                                "quantity": 1
+                                "quantity": quant
                             })
 
     #---
