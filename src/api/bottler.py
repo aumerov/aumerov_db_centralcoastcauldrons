@@ -115,6 +115,7 @@ def get_bottle_plan():
     potions_brewed = []
 
     with db.engine.begin() as connection:
+        potion_capacity = 50
         # Step 2: Retrieve available potion recipes and sort by complexity
         potion_query = """
             SELECT sku, name, red_content, green_content, blue_content, dark_content
@@ -144,7 +145,10 @@ def get_bottle_plan():
                 num_dark_ml -= potion.dark_content
                 quantity_brewed += 1
             
-            if quantity_brewed > 0:
+            if (quantity_brewed > 0) & (potion_capacity > 0):
+                if quantity_brewed > potion_capacity:
+                    quantity_brewed = potion_capacity
+                potion_capacity -= quantity_brewed
                 # Add the brewed potion to the list
                 potions_brewed.append({
                         "potion_type": [potion.red_content, potion.green_content, potion.blue_content, potion.dark_content],
