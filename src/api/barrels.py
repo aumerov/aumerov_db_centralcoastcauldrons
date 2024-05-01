@@ -218,7 +218,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     if barrel_type_to_buy == barrel.potion_type:
                         if gold >= barrel.price:                            
                             # quant = math.floor(gold / barrel.price)
-                            quant = math.ceil(threshold / barrel.ml_per_barrel)  # buy up until threshold 
+                            quant = 1#math.ceil(threshold / barrel.ml_per_barrel)  # buy up until threshold 
                             if quant > barrel.quantity:
                                 quant = barrel.quantity
                             gold -= barrel.price * quant
