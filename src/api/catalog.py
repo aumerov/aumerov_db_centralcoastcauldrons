@@ -10,7 +10,7 @@ router = APIRouter()
 # # Not a table - this is a VIEW
 # ### 
 # for row in results:
-#     catalog.append({}"sku": row.sku, "quantity": row.inventory, ...})
+#     catalog.append({}"sku": row.sku, "quantity": row.inventory, ...}) 
 
 # put hardcoded logic in database - not here.
 

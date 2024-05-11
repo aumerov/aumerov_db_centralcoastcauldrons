@@ -55,19 +55,56 @@ def search_orders(
     Your results must be paginated, the max results you can return at any
     time is 5 total line items.
     """
+    items_per_page = 5
 
+    # if search page is provided, calculate offset
+    page_number = int(search_page) if search_page else 0
+    offset = page_number * items_per_page
+
+    with db.engine.begin() as connection:
+        sql_to_execute = """
+                SELECT 
+                    adventurers.name AS customer,
+                    potion_inventory.name AS item,
+                    (cart_items.current_price * cart_items.quantity) AS gold,
+                    cart_items.quantity AS quantity,
+                    carts.created_at AS time
+                FROM carts
+                JOIN cart_items ON carts.cart_id = cart_items.cart_id
+                JOIN adventurers ON carts.adventurer_id = adventurers.adventurer_id
+                JOIN potion_inventory ON cart_items.sku = potion_inventory.sku
+                ORDER BY carts.created_at DESC
+                LIMIT :limit OFFSET :offset;
+            """
+        result = connection.execute(sqlalchemy.text(sql_to_execute), {
+            'limit': items_per_page + 1,
+            'offset': offset,
+            # 'sort_order': sort_order
+        }).all()
+
+        has_next_page = len(result) > items_per_page
+        results = result[:items_per_page]
+        
+        output = []
+        count = 0
+        for res in results:
+            print(res)
+            output.append({
+                "line_item_id": count,
+                "item_sku": f"{res.quantity} {res.item}",
+                "customer_name": res.customer,
+                "line_item_total": res.gold,
+                "timestamp": res.time,
+            })
+            count += 1
+    
+    prev = page_number - 1 if page_number > 0 else ""
+    next = page_number + 1 if has_next_page else ""
+    print(f"prev: {prev}, next: {next}")
     return {
-        "previous": "",
-        "next": "",
-        "results": [
-            {
-                "line_item_id": 1,
-                "item_sku": "1 oblivion potion",
-                "customer_name": "Scaramouche",
-                "line_item_total": 50,
-                "timestamp": "2021-01-01T00:00:00Z",
-            }
-        ],
+        "previous": prev,
+        "next": next,
+        "results": output,
     }
 
 
