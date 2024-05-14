@@ -90,7 +90,7 @@ def search_orders(
         for res in results:
             print(res)
             output.append({
-                "line_item_id": count,
+                "line_item_id": count + offset,
                 "item_sku": f"{res.quantity} {res.item}",
                 "customer_name": res.customer,
                 "line_item_total": res.gold,

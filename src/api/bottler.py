@@ -116,9 +116,15 @@ def get_bottle_plan():
 
     with db.engine.begin() as connection:
         potion_capacity = 50
+        sql = "SELECT quantity FROM potion_inventory"
+        res = connection.execute(sqlalchemy.text(sql)).fetchall()
+        total_potions = sum(quantity[0] for quantity in res)
+        print(f"Currently have {total_potions} potions")
+        potion_capacity -= total_potions 
+
         # Step 2: Retrieve available potion recipes and sort by complexity
         potion_query = """
-            SELECT sku, name, red_content, green_content, blue_content, dark_content
+            SELECT sku, name, quantity, red_content, green_content, blue_content, dark_content
             FROM potion_inventory
             ORDER BY (red_content > 0)::int + (green_content > 0)::int +
                      (blue_content > 0)::int + (dark_content > 0)::int DESC,
@@ -137,6 +143,9 @@ def get_bottle_plan():
                 num_green_ml >= potion.green_content and
                 num_blue_ml >= potion.blue_content and
                 num_dark_ml >= potion.dark_content):
+
+                if potion.quantity >= 15:
+                    break
                 
                 # Create the potion and update ml_inventory
                 num_red_ml -= potion.red_content

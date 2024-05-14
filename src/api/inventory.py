@@ -4,6 +4,8 @@ from src.api import auth
 from enum import Enum
 import sqlalchemy
 from src import database as db
+from .helper import global_status, potion_status, itemize
+
 
 router = APIRouter(
     prefix="/inventory",
@@ -64,11 +66,20 @@ def get_capacity_plan():
     Start with 1 capacity for 50 potions and 1 capacity for 10000 ml of potion. Each additional 
     capacity unit costs 1000 gold. (multiples of above)
     """
-
+    
+    gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status()
+    potion_cap = 0
+    ml_cap = 0
+    if gold > 2000:
+        potion_cap = 1
+    
     return {
-        "potion_capacity": 0,
-        "ml_capacity": 0
-        }
+        "potion_capacity": potion_cap,
+        "ml_capacity": ml_cap
+    }
+
+
+
 
 class CapacityPurchase(BaseModel):
     potion_capacity: int
@@ -83,5 +94,19 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
     Start with 1 capacity for 50 potions and 1 capacity for 10000 ml of potion. Each additional 
     capacity unit costs 1000 gold.
     """
+    potion_cap = capacity_purchase.potion_capacity
+    ml_cap = capacity_purchase.ml_capacity
+
+    if potion_cap > 0 or ml_cap > 0:
+        with db.engine.begin() as connection:
+            sql = """
+                UPDATE capacity_inventory 
+                SET potion_capacity = potion_capacity + :potion_capacity
+                SET ml_capacity = ml_capacity + :ml_capacity"""
+            connection.execute(sqlalchemy.text(sql),
+                {
+                    'potion_capacity': potion_cap * 50,
+                    'ml_capacity': ml_cap * 1000
+                })
 
     return "OK"
