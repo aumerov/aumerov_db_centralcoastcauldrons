@@ -70,7 +70,8 @@ def get_capacity_plan():
     gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status()
     potion_cap = 0
     ml_cap = 0
-    if gold > 2000:
+    if gold > 5000:
+        ml_cap = 1
         potion_cap = 1
     print(f"Purchasing {potion_cap} potion capacity and {ml_cap} ml capacity")
     return {

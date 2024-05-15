@@ -117,7 +117,7 @@ def get_bottle_plan():
     with db.engine.begin() as connection:
         # sql = "SELECT potion_capacity FROM capacity_inventory"
         # res = connection.execute(sqlalchemy.text(sql)).fetchone()
-        # potion_capacity = res
+        # potion_capacity = res if res else 100
         potion_capacity = 100
         sql = "SELECT quantity FROM potion_inventory"
         res = connection.execute(sqlalchemy.text(sql)).fetchall()
