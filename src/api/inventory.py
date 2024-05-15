@@ -98,9 +98,11 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
     print("Capacity deliver called")
     potion_cap = capacity_purchase.potion_capacity
     ml_cap = capacity_purchase.ml_capacity
+    gold_spent = potion_cap * 1000 + ml_cap * 1000
 
     if potion_cap > 0 or ml_cap > 0:
         with db.engine.begin() as connection:
+            # update capacity
             sql = """
                 UPDATE capacity_inventory 
                 SET potion_capacity = potion_capacity + :potion_capacity,
@@ -108,8 +110,16 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
             connection.execute(sqlalchemy.text(sql),
                 {
                     'potion_capacity': potion_cap * 50,
-                    'ml_capacity': ml_cap * 1000
+                    'ml_capacity': ml_cap * 10000
                 })
-    print(f"Potion capacity\t+{potion_cap * 50}\nMl capacity\t+{ml_cap * 1000}")
+            # update gold
+            sql = """
+                UPDATE global_inventory 
+                SET quantity = quantity - :gold_spent"""
+            connection.execute(sqlalchemy.text(sql),
+                {
+                    'gold_spent': gold_spent
+                })
+    print(f"Potion capacity\t+{potion_cap * 50}\nMl capacity\t+{ml_cap * 10000}")
 
     return "OK"
