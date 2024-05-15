@@ -115,7 +115,10 @@ def get_bottle_plan():
     potions_brewed = []
 
     with db.engine.begin() as connection:
-        potion_capacity = 50
+        # sql = "SELECT potion_capacity FROM capacity_inventory"
+        # res = connection.execute(sqlalchemy.text(sql)).fetchone()
+        # potion_capacity = res
+        potion_capacity = 100
         sql = "SELECT quantity FROM potion_inventory"
         res = connection.execute(sqlalchemy.text(sql)).fetchall()
         total_potions = sum(quantity[0] for quantity in res)
