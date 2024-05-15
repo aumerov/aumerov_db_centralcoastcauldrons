@@ -5,7 +5,7 @@ import sqlalchemy
 from src import database as db
 import math
 import random
-from .helper import global_status, potion_status, itemize
+from .helper import global_status, potion_status, itemize, capacity_status
 
 router = APIRouter(
     prefix="/barrels",
@@ -187,6 +187,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print("CATALOG")
     print(wholesale_catalog)
 
+    potion_capacity, ml_capacity  = capacity_status()
+
     gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status()   # I know, I know, I will stop using these hard-coded helpers soon.
     # num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status()
     catalog = itemize(wholesale_catalog)
@@ -196,7 +198,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     ml_inventory = [num_red_ml, num_green_ml, num_blue_ml, num_dark_ml]
     current_total_ml = sum(ml_inventory)
     capacity = 10000  # max capacity until buy more
-    threshold = 1500
+    threshold = ml_capacity / 4
     initial_gold = gold            # copy of gold just in case
     barrels_to_purchase = []    # final purchase plan
 
@@ -213,7 +215,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
             # check catalog for barrel of that type
             for key, barrel in catalog.items():
-                if key.startswith('SMALL'): 
+                # if key.startswith('SMALL'): 
                     # print("entry: ", key)
                     if barrel_type_to_buy == barrel.potion_type:
                         if gold >= barrel.price:                            
