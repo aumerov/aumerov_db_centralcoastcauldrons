@@ -5,7 +5,7 @@ from src.api import auth
 import sqlalchemy
 from src import database as db
 import math
-from .helper import global_status, potion_status
+from .helper import global_status, potion_status, capacity_status
 
 router = APIRouter(
     prefix="/bottler",
@@ -119,7 +119,7 @@ def get_bottle_plan():
         res = connection.execute(sqlalchemy.text(sql)).fetchone()
         potion_capacity = int(res[0]) if res else 100
         print(f"current potion capacity: {potion_capacity}")
-        
+
         sql = "SELECT quantity FROM potion_inventory"
         res = connection.execute(sqlalchemy.text(sql)).fetchall()
         total_potions = sum(quantity[0] for quantity in res)

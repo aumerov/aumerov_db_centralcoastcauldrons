@@ -37,7 +37,14 @@ def global_status():
     return gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml
 
 
-
+def capacity_status():
+    with db.engine.begin() as connection:
+        sql = "SELECT potion_capacity, ml_capacity FROM capacity_inventory"
+        res = connection.execute(sqlalchemy.text(sql)).fetchone()
+        potion_capacity = int(res[0]) if res else 100
+        ml_capacity = int(res[1]) if res else 10000
+        print(f"Current potion capacity: \t{potion_capacity}\nCurrent ml capacity: \t{ml_capacity}")
+    return potion_capacity, ml_capacity
 
 
 # Still hard coded. Returns the current potion inventory (rows)   TODO: remove hard coding

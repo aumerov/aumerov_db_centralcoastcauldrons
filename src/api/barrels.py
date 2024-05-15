@@ -211,9 +211,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             # buy a potion of that type. Logic will implicitly start with red > green > blue > dark.
             # Buy one small barrel at a time
 
-            # check catalog for small barrel of that type
+            # check catalog for barrel of that type
             for key, barrel in catalog.items():
-                if key.startswith('SMALL'):  # small barrels only, for now
+                if key.startswith('SMALL'): 
                     # print("entry: ", key)
                     if barrel_type_to_buy == barrel.potion_type:
                         if gold >= barrel.price:                            
