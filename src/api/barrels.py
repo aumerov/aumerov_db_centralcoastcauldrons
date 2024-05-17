@@ -217,13 +217,16 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         if gold >= barrel.price:                            
                             max_affordable_quant = math.floor(gold / barrel.price)
                             threshold_quant = math.ceil(threshold / barrel.ml_per_barrel)
-                            quant = min(max_affordable_quant, barrel.quantity, threshold_quant)
+                            capacity_quant = math.floor((ml_capacity - current_total_ml) / barrel.ml_per_barrel)
+                            quant = min(max_affordable_quant, barrel.quantity, threshold_quant, capacity_quant)
 
-                            gold -= barrel.price * quant
-                            barrels_to_purchase.append({
-                                "sku": key,
-                                "quantity": quant
-                            })
+                            if quant > 0:
+                                gold -= barrel.price * quant
+                                current_total_ml += quant * barrel.ml_per_barrel
+                                barrels_to_purchase.append({
+                                    "sku": key,
+                                    "quantity": quant
+                                })
 
     # #---
     # # extra gold remaining: spend on random barrels, buy as much as possible.
