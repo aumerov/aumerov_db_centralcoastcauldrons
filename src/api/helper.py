@@ -37,31 +37,29 @@ def global_status():
     return gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml
 
 
+# Returns the current potion inventory (rows)   TODO: remove hard coding
+# def potion_status():
+#     with db.engine.begin() as connection:
+#         sql_to_execute = \
+#             """SELECT * 
+#             FROM potion_inventory
+#             """
+#         result = connection.execute(sqlalchemy.text(sql_to_execute))
 
+#     data = result.fetchall() 
+#     print("Current potion inventory: ", data)
 
-# Still hard coded. Returns the current potion inventory (rows)   TODO: remove hard coding
-def potion_status():
-    with db.engine.begin() as connection:
-        sql_to_execute = \
-            """SELECT * 
-            FROM potion_inventory
-            """
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+#     # Manually build the dictionary. Hard coded for name : quantity
+#     inventory_dict = {item[0]: item[2] for item in data}
 
-    data = result.fetchall() 
-    print("Current potion inventory: ", data)
+#     # entries will move around based on their value in the database. No hard coding here. TODO: fix (pass in column name and get a list?)
+#     num_red_potions = inventory_dict.get('red_potion', 0)
+#     num_green_potions = inventory_dict.get('green_potion', 0)
+#     num_blue_potions = inventory_dict.get('blue_potion', 0)
+#     num_dark_potions = inventory_dict.get('dark_potion', 0)
 
-    # Manually build the dictionary. Hard coded for name : quantity
-    inventory_dict = {item[0]: item[2] for item in data}
-
-    # entries will move around based on their value in the database. No hard coding here. TODO: fix (pass in column name and get a list?)
-    num_red_potions = inventory_dict.get('red_potion', 0)
-    num_green_potions = inventory_dict.get('green_potion', 0)
-    num_blue_potions = inventory_dict.get('blue_potion', 0)
-    num_dark_potions = inventory_dict.get('dark_potion', 0)
-
-    # print(num_red_potions, num_green_potions, num_blue_potions, num_dark_potions)
-    return num_red_potions, num_green_potions, num_blue_potions, num_dark_potions
+#     # print(num_red_potions, num_green_potions, num_blue_potions, num_dark_potions)
+#     return num_red_potions, num_green_potions, num_blue_potions, num_dark_potions
 
 
 # returns a dictionary of items, keyed by SKU. Used for wholesale barrel catalog
@@ -73,10 +71,7 @@ def itemize(catalog):
     return barrel_dict
 
 
-
-
-
-
+# returns the current potion and ml capacity
 def capacity_status():
     with db.engine.begin() as connection:
         sql = "SELECT potion_capacity, ml_capacity FROM capacity_inventory"

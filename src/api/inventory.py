@@ -4,7 +4,7 @@ from src.api import auth
 from enum import Enum
 import sqlalchemy
 from src import database as db
-from .helper import global_status, potion_status, itemize
+from .helper import global_status, itemize
 
 
 router = APIRouter(

@@ -5,7 +5,7 @@ from src.api import auth
 import sqlalchemy
 from src import database as db
 import math
-from .helper import global_status, potion_status, capacity_status
+from .helper import global_status, capacity_status
 
 router = APIRouter(
     prefix="/bottler",

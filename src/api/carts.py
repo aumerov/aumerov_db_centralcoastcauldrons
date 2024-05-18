@@ -5,7 +5,7 @@ from enum import Enum
 import sqlalchemy
 from src import database as db
 import os
-from .helper import global_status, potion_status
+from .helper import global_status
 
 router = APIRouter(
     prefix="/carts",

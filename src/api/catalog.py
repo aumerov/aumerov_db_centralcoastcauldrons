@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 import sqlalchemy
 from src import database as db
-from .helper import global_status, potion_status
+from .helper import global_status
 
 router = APIRouter()
 
