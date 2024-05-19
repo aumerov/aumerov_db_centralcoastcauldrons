@@ -26,7 +26,7 @@ def get_catalog():
         # gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml = global_status() 
         # num_red_potions, num_green_potions, num_blue_potions, num_dark_potions = potion_status() 
         
-        query = sqlalchemy.text(f"SELECT * FROM potion_inventory")
+        query = sqlalchemy.text(f"SELECT * FROM potion_inventory ORDER BY price DESC")  # LIMIT 6   <- add limit?
         result = connection.execute(query)
         data = result.fetchall()
         # print("Current potion inventory: ", data) 
@@ -56,7 +56,7 @@ def get_catalog():
                     "price": price,
                     "potion_type": type,
                 })
-                if len(catalog) >= 6:
+                if len(catalog) >= 6:  # remove if adding limit to SQL query
                     break  
 
     return catalog
