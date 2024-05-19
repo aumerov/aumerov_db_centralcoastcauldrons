@@ -120,7 +120,7 @@ def get_bottle_plan():
         # res = connection.execute(sqlalchemy.text(sql)).fetchone()
         # potion_capacity = int(res[0]) if res else 100
         # print(f"current potion capacity: {potion_capacity}")
-
+        
         sql = "SELECT quantity FROM potion_inventory"
         res = connection.execute(sqlalchemy.text(sql)).fetchall()
         total_potions = sum(quantity[0] for quantity in res)
@@ -149,7 +149,7 @@ def get_bottle_plan():
                 num_blue_ml >= potion.blue_content and
                 num_dark_ml >= potion.dark_content):
 
-                if potion.quantity >= 15:
+                if potion.quantity >= potion_capacity / 6:
                     break
                 
                 # Create the potion and update ml_inventory
