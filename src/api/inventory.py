@@ -118,7 +118,8 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
             # update gold
             sql = """
                 UPDATE global_inventory 
-                SET quantity = quantity - :gold_spent"""
+                SET quantity = quantity - :gold_spent
+                WHERE name = 'gold'"""
             connection.execute(sqlalchemy.text(sql),
                 {
                     'gold_spent': gold_spent
