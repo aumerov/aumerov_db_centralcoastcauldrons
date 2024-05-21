@@ -76,6 +76,9 @@ def get_capacity_plan():
     if gold > 10000:
         ml_cap = 2
         potion_cap = 2
+    if gold > 15000:
+        ml_cap = 3
+        potion_cap = 3
     print(f"Purchasing {potion_cap} potion capacity and {ml_cap} ml capacity")
     return {
         "potion_capacity": potion_cap,

@@ -137,7 +137,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     ml_inventory = [num_red_ml, num_green_ml, num_blue_ml, num_dark_ml]
     current_total_ml = sum(ml_inventory)
     threshold = ml_capacity / 4
-    initial_gold = gold            # copy of gold just in case
+    # initial_gold = gold            # copy of gold just in case
     barrels_to_purchase = []    # final purchase plan
 
 
@@ -149,22 +149,24 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
             # check catalog for barrel of that type
             for key, barrel in catalog.items():
+                current_total_ml = sum(ml_inventory)
                 # if key.startswith('SMALL'): 
-                    # print("entry: ", key)
-                    if barrel_type_to_buy == barrel.potion_type:
-                        if gold >= barrel.price:                            
-                            max_affordable_quant = math.floor(gold / barrel.price)
-                            threshold_quant = math.ceil(threshold / barrel.ml_per_barrel)
-                            capacity_quant = math.floor((ml_capacity - current_total_ml) / barrel.ml_per_barrel)
-                            quant = min(max_affordable_quant, barrel.quantity, threshold_quant, capacity_quant)
+                # print("entry: ", key)
+                if barrel_type_to_buy == barrel.potion_type:
+                    if gold >= barrel.price:                            
+                        max_affordable_quant = math.floor(gold / barrel.price)
+                        threshold_quant = math.ceil(threshold / barrel.ml_per_barrel)
+                        capacity_quant = math.floor((ml_capacity - current_total_ml) / barrel.ml_per_barrel)
+                        quant = min(max_affordable_quant, barrel.quantity, threshold_quant, capacity_quant)
 
-                            if quant > 0:
-                                gold -= barrel.price * quant
-                                current_total_ml += quant * barrel.ml_per_barrel
-                                barrels_to_purchase.append({
-                                    "sku": key,
-                                    "quantity": quant
-                                })
+                        if quant > 0:
+                            ml += quant * barrel.ml_per_barrel
+                            gold -= barrel.price * quant
+                            current_total_ml += quant * barrel.ml_per_barrel
+                            barrels_to_purchase.append({
+                                "sku": key,
+                                "quantity": quant
+                            })
 
     print(f"Plan: {barrels_to_purchase}")
     return barrels_to_purchase
