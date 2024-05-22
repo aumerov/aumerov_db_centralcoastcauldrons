@@ -149,7 +149,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
             # check catalog for barrel of that type
             for key, barrel in catalog.items():
-                current_total_ml = sum(ml_inventory)
+                # current_total_ml = sum(ml_inventory)
                 # if key.startswith('SMALL'): 
                 # print("entry: ", key)
                 if barrel_type_to_buy == barrel.potion_type:
@@ -161,8 +161,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
                         if quant > 0:
                             gold -= barrel.price * quant
-                            ml += quant * barrel.ml_per_barrel
-                            # current_total_ml += quant * barrel.ml_per_barrel
+                            # ml += quant * barrel.ml_per_barrel
+                            current_total_ml += quant * barrel.ml_per_barrel
                             barrels_to_purchase.append({
                                 "sku": key,
                                 "quantity": quant
