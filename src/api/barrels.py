@@ -160,9 +160,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         quant = min(max_affordable_quant, barrel.quantity, threshold_quant, capacity_quant)
 
                         if quant > 0:
-                            ml += quant * barrel.ml_per_barrel
                             gold -= barrel.price * quant
-                            current_total_ml += quant * barrel.ml_per_barrel
+                            ml += quant * barrel.ml_per_barrel
+                            # current_total_ml += quant * barrel.ml_per_barrel
                             barrels_to_purchase.append({
                                 "sku": key,
                                 "quantity": quant
